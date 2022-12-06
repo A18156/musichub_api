@@ -60,7 +60,7 @@ public class Account implements Serializable {
     private String avatar;
 
     @NotNull
-//    @Size(max = 120)
+    @Size(max = 120)
     @Column(name = "password")
     private String password;
 
@@ -72,16 +72,19 @@ public class Account implements Serializable {
     private Date dateRegister;
 
     @Column(name = "isArtist")
-    private Integer isArtist;
+    private boolean isArtist;
 
     @Column(name = "active")
-    private Boolean active;
+    private boolean active ;
+
+    @Column(name = "package_term")
+    private Date packageTerm;
 
     @ManyToMany(fetch = FetchType.LAZY)
-    @JoinTable(name = "account_roles",
+    @JoinTable(name = "account_role",
             joinColumns = @JoinColumn(name = "accountID"),
-            inverseJoinColumns = @JoinColumn(name = "roleID"))
-    private Set<Roles> roles = new HashSet<>();
+            inverseJoinColumns = @JoinColumn(name = "roleid"))
+    private Set<Role> roles = new HashSet<>();
 
     public Account() {
     }
@@ -96,11 +99,11 @@ public class Account implements Serializable {
         this.username = username;
     }
 
-    public Set<Roles> getRoles() {
+    public Set<Role> getRoles() {
         return roles;
     }
 
-    public void setRoles(Set<Roles> roles) {
+    public void setRoles(Set<Role> roles) {
         this.roles = roles;
     }
 }
