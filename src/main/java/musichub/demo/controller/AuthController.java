@@ -51,10 +51,10 @@ public class AuthController {
     JwtUtils jwtUtils;
 
     @GetMapping("/getuser")
-//    public ResponseEntity<?> username(Authentication authentication){
-//        var userDetails = (UserDetailsImpl) authentication.getPrincipal();
-//        return ResponseEntity.ok().body(userDetails.getAccountID());
-//    }
+    public ResponseEntity<?> username(Authentication authentication){
+        var userDetails = (UserDetailsImpl) authentication.getPrincipal();
+        return ResponseEntity.ok().body(userDetails.getAccountID());
+    }
     @PostMapping("/signin")
     public ResponseEntity<?> authenticateUser(@Valid @RequestBody LoginRequest loginRequest) {
 
@@ -163,10 +163,7 @@ public class AuthController {
 //            return ResponseEntity.badRequest().body(new MessageResponse("Error: Email is already in use!"));
 //        }
 //        var updateEntity = userRepository.findAllById(Collections.singleton(id));
-//
-//
-//
-//
+
 //        Set<String> strRoles = signUpRequest.getRole();
 //        Set<Role> roles = new HashSet<>();
 //
