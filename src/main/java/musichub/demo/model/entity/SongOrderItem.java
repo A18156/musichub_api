@@ -1,4 +1,4 @@
-package musichub.demo.model;
+package musichub.demo.model.entity;
 
 import lombok.Data;
 import lombok.EqualsAndHashCode;

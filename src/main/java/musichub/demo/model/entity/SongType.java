@@ -11,7 +11,8 @@ import javax.persistence.Table;
 @EqualsAndHashCode(callSuper = true)
 @Entity
 @Table(name = "songtype")
-public class Song_Type extends BaseEntity<Long>{
+public class SongType extends BaseEntity<Long>{
     @Column(name = "name", nullable = false)
     private String name;
 }
+

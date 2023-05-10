@@ -1,6 +1,7 @@
-package musichub.demo.model;
+package musichub.demo.model.entity;
 
 import lombok.Data;
+import musichub.demo.model.ERole;
 
 import javax.persistence.*;
 import java.io.Serializable;

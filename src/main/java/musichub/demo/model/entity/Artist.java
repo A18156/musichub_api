@@ -1,9 +1,10 @@
-package musichub.demo.model;
+package musichub.demo.model.entity;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import musichub.demo.model.ArtistType;
 import org.hibernate.annotations.GenericGenerator;
 import org.hibernate.annotations.Type;
 
@@ -39,7 +40,6 @@ public class Artist {
     @Column
     private String image;
 
-    @NotNull
     @Enumerated(EnumType.STRING)
     @Column(name = "artist_type", nullable = false)
     private ArtistType artistType;
