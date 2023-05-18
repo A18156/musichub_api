@@ -1,5 +1,6 @@
 package musichub.demo.controller;
 
+import lombok.var;
 import musichub.demo.model.entity.Account;
 import musichub.demo.model.ERole;
 import musichub.demo.model.entity.Role;
@@ -50,11 +51,11 @@ public class AuthController {
     @Autowired
     JwtUtils jwtUtils;
 
-    @GetMapping("/getuser")
-    public ResponseEntity<?> username(Authentication authentication){
-        var userDetails = (UserDetailsImpl) authentication.getPrincipal();
-        return ResponseEntity.ok().body(userDetails.getAccountID());
-    }
+    //    @GetMapping("/getuser")
+//    public ResponseEntity<?> username(Authentication authentication){
+//        var userDetails = (UserDetailsImpl) authentication.getPrincipal();
+//        return ResponseEntity.ok().body(userDetails.getAccountID());
+//    }
     @PostMapping("/signin")
     public ResponseEntity<?> authenticateUser(@Valid @RequestBody LoginRequest loginRequest) {
 
@@ -90,6 +91,9 @@ public class AuthController {
 
     @PostMapping("/signup")
     public ResponseEntity<?> registerUser(@Valid @RequestBody SignupRequest signUpRequest) {
+        if(userRepository.existsByPhone(signUpRequest.getPhone())){
+            return  ResponseEntity.badRequest().body(new MessageResponse("Error: Phone number is already taken!"));
+        }
         if (userRepository.existsByUsername(signUpRequest.getUsername())) {
             return ResponseEntity.badRequest().body(new MessageResponse("Error: Username is already taken!"));
         }
@@ -130,12 +134,6 @@ public class AuthController {
                         roles.add(modRole);
 
                         break;
-                    case "premium":
-                        Role preRole = roleRepository.findByName(ERole.ROLE_PREMIUM)
-                                .orElseThrow(() -> new RuntimeException("Error: Role is not found."));
-                        roles.add(preRole);
-
-                        break;
                     default:
                         Role userRole = roleRepository.findByName(ERole.ROLE_USER)
                                 .orElseThrow(() -> new RuntimeException("Error: Role is not found."));
@@ -153,61 +151,6 @@ public class AuthController {
         return ResponseEntity.ok(new MessageResponse("User registered successfully!"));
     }
 
-//    @PostMapping("/accountUpdate")
-//    public ResponseEntity<?> update( @PathVariable Long id,@Valid @RequestBody Account updateRequest) {
-//        if (userRepository.existsByUsername(signUpRequest.getUsername())) {
-//            return ResponseEntity.badRequest().body(new MessageResponse("Error: Username is already taken!"));
-//        }
-//
-//        if (userRepository.existsByEmail(signUpRequest.getEmail())) {
-//            return ResponseEntity.badRequest().body(new MessageResponse("Error: Email is already in use!"));
-//        }
-//        var updateEntity = userRepository.findAllById(Collections.singleton(id));
-
-//        Set<String> strRoles = signUpRequest.getRole();
-//        Set<Role> roles = new HashSet<>();
-//
-//        if (strRoles == null) {
-//            Role userRole = roleRepository.findByName(ERole.ROLE_USER)
-//                    .orElseThrow(() -> new RuntimeException("Error: Role is not found."));
-//            roles.add(userRole);
-//        } else {
-//            strRoles.forEach(role -> {
-//                switch (role) {
-//                    case "admin":
-//                        Role adminRole = roleRepository.findByName(ERole.ROLE_ADMIN)
-//                                .orElseThrow(() -> new RuntimeException("Error: Role is not found."));
-//                        roles.add(adminRole);
-//
-//                        break;
-//                    case "mod":
-//                        Role modRole = roleRepository.findByName(ERole.ROLE_MANAGER)
-//                                .orElseThrow(() -> new RuntimeException("Error: Role is not found."));
-//                        roles.add(modRole);
-//
-//                        break;
-//                    case "premium":
-//                        Role preRole = roleRepository.findByName(ERole.ROLE_PREMIUM)
-//                                .orElseThrow(() -> new RuntimeException("Error: Role is not found."));
-//                        roles.add(preRole);
-//
-//                        break;
-//                    default:
-//                        Role userRole = roleRepository.findByName(ERole.ROLE_USER)
-//                                .orElseThrow(() -> new RuntimeException("Error: Role is not found."));
-//                        roles.add(userRole);
-//                }
-//            });
-//        }
-//
-//        user.setRoles(roles);
-//        user.setActive(true);
-//        user.setAvatar("avatar.png");
-//        user.setDateRegister(Date.valueOf(java.time.LocalDate.now()));
-//        userRepository.save(user);
-//
-//        return ResponseEntity.ok(new MessageResponse("User registered successfully!"));
-//    }
     @PostMapping("/signout")
     public ResponseEntity<?> logoutUser() {
         ResponseCookie cookie = jwtUtils.getCleanJwtCookie();
