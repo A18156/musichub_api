@@ -22,6 +22,7 @@ import org.springframework.security.authentication.UsernamePasswordAuthenticatio
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.*;
 
@@ -29,6 +30,7 @@ import javax.validation.Valid;
 import java.sql.Date;
 import java.util.Collections;
 import java.util.HashSet;
+import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -36,6 +38,7 @@ import java.util.stream.Collectors;
 @RestController
 @RequestMapping("/api/auth")
 public class AuthController {
+
     @Autowired
     AuthenticationManager authenticationManager;
 
@@ -91,8 +94,8 @@ public class AuthController {
 
     @PostMapping("/signup")
     public ResponseEntity<?> registerUser(@Valid @RequestBody SignupRequest signUpRequest) {
-        if(userRepository.existsByPhone(signUpRequest.getPhone())){
-            return  ResponseEntity.badRequest().body(new MessageResponse("Error: Phone number is already taken!"));
+        if (userRepository.existsByPhone(signUpRequest.getPhone())) {
+            return ResponseEntity.badRequest().body(new MessageResponse("Error: Phone number is already taken!"));
         }
         if (userRepository.existsByUsername(signUpRequest.getUsername())) {
             return ResponseEntity.badRequest().body(new MessageResponse("Error: Username is already taken!"));
@@ -150,6 +153,20 @@ public class AuthController {
 
         return ResponseEntity.ok(new MessageResponse("User registered successfully!"));
     }
+    @PostMapping("/forgotPassword")
+    public ResponseEntity<?> forgotPwd(@Valid @RequestParam String Email, @RequestParam String pwd){
+        return null;
+    }
+    @PutMapping("/changePassword")
+    public ResponseEntity<?> changePwd(@Valid @RequestParam String pwd,@RequestParam Long id){
+        if(!pwd.isEmpty()){
+            Account account = userRepository.findById(id).get();
+            account.setPassword(encoder.encode(pwd));
+            userRepository.save(account);
+            return ResponseEntity.ok(new MessageResponse("change password successful!"));
+        }else return ResponseEntity.ok(new MessageResponse("invalid password!"));
+    }
+
 
     @PostMapping("/signout")
     public ResponseEntity<?> logoutUser() {
@@ -184,4 +201,5 @@ public class AuthController {
                         roles
                 ));
     }
+
 }

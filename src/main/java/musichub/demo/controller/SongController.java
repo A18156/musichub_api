@@ -1,21 +1,18 @@
 package musichub.demo.controller;
 
+import lombok.var;
 import musichub.demo.model.dto.Result;
 import musichub.demo.model.entity.Song;
+import musichub.demo.model.entity.SongType;
 import musichub.demo.repository.AccountRepository;
-import musichub.demo.repository.ArtistRepository;
 import musichub.demo.repository.SongRepository;
 import musichub.demo.repository.Song_TypeRepository;
 import musichub.demo.service.UserDetailsImpl;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
 import java.sql.Date;
@@ -23,13 +20,13 @@ import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/api/song")
-public class SongController extends CRUDController<SongRepository, Song, Long>{
+public class SongController extends CRUDController<SongRepository, Song, Long> {
     @Autowired
     private AccountRepository accountRepository;
-    @Autowired
-    private ArtistRepository artistRepository;
+
     @Autowired
     private Song_TypeRepository song_typeRepository;
+
     @Override
     protected Song merge(Song oldEntity, Song updateEntity) {
         //get current user
@@ -37,13 +34,14 @@ public class SongController extends CRUDController<SongRepository, Song, Long>{
         var userDetails = (UserDetailsImpl) principal;
 
         oldEntity.setAudio(updateEntity.getAudio());
-        oldEntity.setName(updateEntity.getName());
+        oldEntity.setTitle(updateEntity.getTitle());
         oldEntity.setImage(updateEntity.getImage());
-//        oldEntity.setAccount(updateEntity.getAccount());
-        oldEntity.setAccountid(userDetails.getAccountID());
-        oldEntity.setArtist(updateEntity.getArtist());
-        oldEntity.setSongtype(updateEntity.getSongtype());
-        oldEntity.setDateUpload(Date.valueOf(java.time.LocalDate.now()));
+        oldEntity.setAccountid(updateEntity.getAccountid());
+        oldEntity.setDateUpload(updateEntity.getDateUpload());
+        oldEntity.setPrice(updateEntity.getPrice());
+        oldEntity.setIsPublic(updateEntity.getIsPublic());
+        oldEntity.setAccountid(updateEntity.getAccountid());
+        oldEntity.setSongType(updateEntity.getSongType());
         return oldEntity;
     }
 
@@ -53,51 +51,35 @@ public class SongController extends CRUDController<SongRepository, Song, Long>{
                 && this.repository.existsById(newEntity.getId());
     }
 
+//    @PostMapping("/{accountid}/song")
+//    public ResponseEntity<Song> createComment(@PathVariable(value = "accountid") Long accountid,
+//                                                 @RequestBody Song commentRequest) {
+//        Song song = accountRepository.findById(accountid).map(id -> {
+//            commentRequest.setAccountid(id);
+//            return songRepository.save(commentRequest);
+//        }).orElseThrow(() -> new ResourceNotFoundException("Not found Tutorial with id = " + accountid));
+//
+//        return new ResponseEntity<>(comment, HttpStatus.CREATED);
+//    }
+
     @Override
-    public ResponseEntity<Result<Song>> create(@Valid @RequestBody Song newEntity){
-        if (accountRepository.findById(newEntity.getAccountid()).isEmpty()
-        ) {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST)
-                    .body(Result.badRequest("'account' not exist"));
-        }
-        if (newEntity.getArtist() == null || artistRepository.findByArtistIDIn(newEntity.getArtist()
-                .stream().map(artistID -> artistID.getArtistID())
-                .filter(uuid -> uuid != null)
-                .collect(Collectors.toList())).isEmpty()
-        ) {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST)
-                    .body(Result.badRequest("'artist' not exist"));
-        }
-        if (song_typeRepository.findByIdIn(newEntity.getSongtype()
-                .stream().map(stid -> stid.getId())
-                .filter(stid -> stid !=null)
-                .collect(Collectors.toList())).isEmpty()) {
+    public ResponseEntity<Result<Song>> create(@Valid @RequestBody Song newEntity) {
+
+        if (!song_typeRepository.existsById(newEntity.getSongType().getId())) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST)
                     .body(Result.badRequest("'type' not exist"));
         }
-
+        if (newEntity.getAccountid() == null
+                || !accountRepository.existsById(newEntity.getAccountid().getAccountID())) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                    .body(Result.badRequest("'account' invalid"));
+        }
         return super.create(newEntity);
     }
 
     @Override
-    public ResponseEntity<Result<Void>> update(@PathVariable Long id, @Valid @RequestBody Song updateEntity){
-        if ( accountRepository.findById(updateEntity.getAccountid()).isEmpty()
-        ) {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST)
-                    .body(Result.badRequest("'account' not exist"));
-        }
-        if (updateEntity.getArtist() == null || artistRepository.findByArtistIDIn(updateEntity.getArtist()
-                .stream().map(artistID -> artistID.getArtistID())
-                .filter(uuid -> uuid != null)
-                .collect(Collectors.toList())).isEmpty()
-        ) {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST)
-                    .body(Result.badRequest("'artist' not exist"));
-        }
-        if (song_typeRepository.findByIdIn(updateEntity.getSongtype()
-                .stream().map(stid -> stid.getId())
-                .filter(stid -> stid !=null)
-                .collect(Collectors.toList())).isEmpty()) {
+    public ResponseEntity<Result<Void>> update(@PathVariable Long id, @Valid @RequestBody Song updateEntity) {
+        if (!song_typeRepository.existsById(updateEntity.getSongType().getId())) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST)
                     .body(Result.badRequest("'type' not exist"));
         }

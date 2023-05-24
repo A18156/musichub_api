@@ -24,49 +24,52 @@ import java.util.Set;
 @JsonIgnoreProperties(value = {"handler", "hibernateLazyInitializer", "FieldHandler"})
 @Table(name = "song")
 public class Song extends BaseEntity<Long> {
-
     @NotNull
     @Size(min = 2, max = 30)
-    @Column
-    private String name;
+    @Column(nullable = true, columnDefinition = "TEXT")
+    private String title;
 
-    @JsonIgnore
-    @Column
+    @Column(name = "dateupload",nullable = false)
     private Date dateUpload;
 
-    @Column(nullable = true)
+    @Column(nullable = true, columnDefinition = "TEXT")
     private String image;
 
     @NotNull
-    @Column
+    @Column(nullable = true, columnDefinition = "TEXT")
     private String audio;
 
-//    @JsonInclude(content = JsonInclude.Include.NON_EMPTY)
-//    @JoinColumn(name = "accountID")
-////    @OneToMany(cascade = CascadeType.DETACH)
-//    @OneToMany(fetch = FetchType.LAZY)
+    @NotNull
+    @Column
+    private Double price;
+
+    @NotNull
+    @Column
+    private Boolean isPublic;
+
+    @NotNull
+    @Column
+    private Integer state;
+
+    //    @JsonInclude(content = JsonInclude.Include.NON_EMPTY)
+//    @ManyToOne(fetch = FetchType.LAZY, optional = false)
+//    @JoinColumn(name = "accountID", referencedColumnName = "accountID", unique = true)
+////    @JoinColumn(name = "accountid", nullable = false)
 //    @OnDelete(action = OnDeleteAction.CASCADE)
-//    private Set<Account> account = new HashSet<>();
+////    @JsonIgnore
+//    private Account accountid;
+    @ManyToOne(fetch = FetchType.LAZY, optional = false)
+    @JoinColumn(name = "accountID", nullable = false)
+    @OnDelete(action = OnDeleteAction.CASCADE)
+    private Account accountid;
 
-    @JsonIgnore
-    @Column(nullable = false)
-    private Long accountid;
-
-    @JsonInclude(content = JsonInclude.Include.NON_EMPTY)
-    @ManyToMany(fetch = FetchType.LAZY)
-    @JoinTable(name = "song_artist",
-            inverseJoinColumns =
-                    {@JoinColumn(name = "songid")},
-            joinColumns =
-                    {@JoinColumn(name = "artistid")})
-    private Set<Artist> artist = new HashSet<>();
-
-    @JsonInclude(content = JsonInclude.Include.NON_EMPTY)
-    @ManyToMany(fetch = FetchType.LAZY)
-    @JoinTable(name = "song_songType",
-            inverseJoinColumns =
-                    {@JoinColumn(name = "songid")},
-            joinColumns =
-                    {@JoinColumn(name = "songtypeid")})
-    private Set<SongType> songtype = new HashSet<>();
+    //    @ManyToMany(fetch = FetchType.LAZY)
+//    @JoinTable(name = "type_of_song",
+//            joinColumns = @JoinColumn(name = "songid"),
+//            inverseJoinColumns = @JoinColumn(name = "songtypeid"))
+//    private Set<SongType> songType= new HashSet<>();
+    @ManyToOne(fetch = FetchType.LAZY, optional = false)
+    @JoinColumn(name = "songtype", nullable = false)
+    @OnDelete(action = OnDeleteAction.CASCADE)
+    private SongType songType;
 }

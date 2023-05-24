@@ -1,5 +1,6 @@
 package musichub.demo.controller;
 
+import lombok.var;
 import musichub.demo.model.dto.Result;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -52,7 +53,7 @@ public abstract class CRUDController<R extends JpaRepository<E, I>, E, I> {
     @PutMapping("/{id}")
     public ResponseEntity<Result<Void>> update(@PathVariable I id, @Valid @RequestBody E updateEntity) {
         var optional = repository.findById(id);
-        if (optional.isEmpty()) {
+        if (!optional.isPresent()) {
             return ResponseEntity
                     .status(HttpStatus.NOT_FOUND)
                     .body(Result.notFound());

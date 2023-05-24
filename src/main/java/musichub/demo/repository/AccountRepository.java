@@ -16,5 +16,7 @@ public interface AccountRepository extends JpaRepository<Account, Long>{
 
     Boolean existsByPhone(String phone);
 
+    String findByPassword(String pwd);
+
     List<Account> findByAccountIDIn(List<Long> longs);
 }
