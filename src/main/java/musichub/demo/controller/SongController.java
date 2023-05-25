@@ -51,17 +51,6 @@ public class SongController extends CRUDController<SongRepository, Song, Long> {
                 && this.repository.existsById(newEntity.getId());
     }
 
-//    @PostMapping("/{accountid}/song")
-//    public ResponseEntity<Song> createComment(@PathVariable(value = "accountid") Long accountid,
-//                                                 @RequestBody Song commentRequest) {
-//        Song song = accountRepository.findById(accountid).map(id -> {
-//            commentRequest.setAccountid(id);
-//            return songRepository.save(commentRequest);
-//        }).orElseThrow(() -> new ResourceNotFoundException("Not found Tutorial with id = " + accountid));
-//
-//        return new ResponseEntity<>(comment, HttpStatus.CREATED);
-//    }
-
     @Override
     public ResponseEntity<Result<Song>> create(@Valid @RequestBody Song newEntity) {
 

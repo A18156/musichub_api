@@ -4,6 +4,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 import lombok.extern.slf4j.Slf4j;
+import lombok.var;
 import musichub.demo.model.FileInfo;
 import musichub.demo.model.dto.Result;
 import musichub.demo.payload.response.MessageResponse;

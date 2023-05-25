@@ -1,5 +1,6 @@
 package musichub.demo.controller;
 
+import io.jsonwebtoken.lang.Assert;
 import lombok.var;
 import musichub.demo.model.entity.Account;
 import musichub.demo.model.ERole;
@@ -10,35 +11,35 @@ import musichub.demo.payload.response.MessageResponse;
 import musichub.demo.payload.response.UserInfoResponse;
 import musichub.demo.repository.AccountRepository;
 import musichub.demo.repository.RoleRepository;
-import musichub.demo.service.JwtUtils;
-import musichub.demo.service.UserDetailsImpl;
+import musichub.demo.service.*;
+import org.apache.commons.lang.RandomStringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseCookie;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.annotation.Secured;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
-import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
 import java.sql.Date;
-import java.util.Collections;
 import java.util.HashSet;
-import java.util.Optional;
+import java.util.Random;
 import java.util.Set;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 @CrossOrigin(origins = {"http://localhost:8080", "http://localhost:3000"}, maxAge = 3600, allowCredentials = "true")
 @RestController
 @RequestMapping("/api/auth")
 public class AuthController {
-
+    public static final Pattern EMAIL_PATTERN = Pattern.compile("^[a-zA-Z0-9_!#$%&'*+/=?`{|}~^.-]+@[a-zA-Z0-9.-]+$");
     @Autowired
     AuthenticationManager authenticationManager;
 
@@ -50,6 +51,9 @@ public class AuthController {
 
     @Autowired
     PasswordEncoder encoder;
+
+    @Autowired
+    private EmailSenderService senderService;
 
     @Autowired
     JwtUtils jwtUtils;
@@ -153,18 +157,50 @@ public class AuthController {
 
         return ResponseEntity.ok(new MessageResponse("User registered successfully!"));
     }
-    @PostMapping("/forgotPassword")
-    public ResponseEntity<?> forgotPwd(@Valid @RequestParam String Email, @RequestParam String pwd){
-        return null;
-    }
-    @PutMapping("/changePassword")
-    public ResponseEntity<?> changePwd(@Valid @RequestParam String pwd,@RequestParam Long id){
-        if(!pwd.isEmpty()){
-            Account account = userRepository.findById(id).get();
-            account.setPassword(encoder.encode(pwd));
+
+
+    @PostMapping("/forgot-password")
+    public ResponseEntity<?> forgotPwd(@Valid @RequestBody MailRequest request) {
+        Matcher matcher = EMAIL_PATTERN.matcher(request.getMail());
+        if (matcher.matches()) {
+            var account = userRepository.findAccountByEmail(request.getMail());
+            if (account == null) {
+                return ResponseEntity.badRequest().body(new MessageResponse("user not found!"));
+            }
+            String randomPwd = RandomStringUtils.randomAlphanumeric(6);
+            account.setPassword(encoder.encode(randomPwd));
             userRepository.save(account);
-            return ResponseEntity.ok(new MessageResponse("change password successful!"));
-        }else return ResponseEntity.ok(new MessageResponse("invalid password!"));
+            String subject = "MusicHub - Reset Password";
+            String body = "Hello,\n\nNew password is " + randomPwd;
+            senderService.sendEmail(request.getMail(), subject, body);
+            return ResponseEntity.ok(new MessageResponse("mail sent successful!!"));
+        }
+        return ResponseEntity.badRequest().body(new MessageResponse("email invalid"));
+    }
+
+    @Secured({"ROLE_ADMIN", "ROLE_MANAGER", "ROLE_USER"})
+    @PostMapping("/change-password")
+    public ResponseEntity<?> changePwd(@Valid @RequestBody ChangePasswordRequest changePasswordRequest) {
+        String newPwd = changePasswordRequest.getNewPassword();
+        String oldPwd = changePasswordRequest.getOldPassword();
+        Assert.hasLength(newPwd);
+        Assert.hasLength(oldPwd);
+
+        if (newPwd.equals(oldPwd)) {
+            return ResponseEntity.badRequest().body(new MessageResponse("new password not equal old password!!"));
+        }
+
+        UserDetailsImpl authentication = (UserDetailsImpl) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        Long getID = authentication.getAccountID();
+
+        var currentAcountDetail = userRepository.findAccountByAccountID(getID);
+
+        if (!encoder.matches(oldPwd, currentAcountDetail.getPassword())) {
+            return ResponseEntity.badRequest().body(new MessageResponse("you entered the wrong old password!!"));
+        }
+        currentAcountDetail.setPassword(encoder.encode(newPwd));
+        userRepository.save(currentAcountDetail);
+        return ResponseEntity.ok(new MessageResponse("change password successful!!"));
     }
 
 
@@ -186,7 +222,8 @@ public class AuthController {
                 .map(GrantedAuthority::getAuthority)
                 .collect(Collectors.toList());
         return ResponseEntity.ok()
-                .body(new UserInfoResponse(userDetails.getAccountID(),
+                .body(new UserInfoResponse(
+                        userDetails.getAccountID(),
                         userDetails.getName(),
                         userDetails.getGender(),
                         userDetails.getBirthday(),

@@ -2,6 +2,7 @@ package musichub.demo;
 
 import lombok.RequiredArgsConstructor;
 //import musichub.demo.repository.OrderItemRepository;
+import lombok.var;
 import musichub.demo.model.ERole;
 import musichub.demo.model.entity.Role;
 import musichub.demo.repository.RoleRepository;
