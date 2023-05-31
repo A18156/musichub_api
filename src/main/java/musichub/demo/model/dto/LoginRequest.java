@@ -1,4 +1,4 @@
-package musichub.demo.payload.request;
+package musichub.demo.model.dto;
 
 
 import javax.validation.constraints.NotBlank;

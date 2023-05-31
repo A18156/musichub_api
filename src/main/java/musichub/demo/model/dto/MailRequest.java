@@ -1,4 +1,4 @@
-package musichub.demo.service;
+package musichub.demo.model.dto;
 
 import lombok.Data;
 
@@ -7,5 +7,5 @@ import javax.validation.constraints.NotNull;
 
 @Data
 public class MailRequest {
-    private String mail;
+    private String email;
 }

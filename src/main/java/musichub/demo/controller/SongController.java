@@ -3,7 +3,6 @@ package musichub.demo.controller;
 import lombok.var;
 import musichub.demo.model.dto.Result;
 import musichub.demo.model.entity.Song;
-import musichub.demo.model.entity.SongType;
 import musichub.demo.repository.AccountRepository;
 import musichub.demo.repository.SongRepository;
 import musichub.demo.repository.Song_TypeRepository;
@@ -15,8 +14,6 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
-import java.sql.Date;
-import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/api/song")
@@ -26,6 +23,7 @@ public class SongController extends CRUDController<SongRepository, Song, Long> {
 
     @Autowired
     private Song_TypeRepository song_typeRepository;
+
 
     @Override
     protected Song merge(Song oldEntity, Song updateEntity) {
@@ -58,11 +56,21 @@ public class SongController extends CRUDController<SongRepository, Song, Long> {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST)
                     .body(Result.badRequest("'type' not exist"));
         }
+        UserDetailsImpl authentication = (UserDetailsImpl) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        Long getID = authentication.getAccountID();
+
+
         if (newEntity.getAccountid() == null
                 || !accountRepository.existsById(newEntity.getAccountid().getAccountID())) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST)
                     .body(Result.badRequest("'account' invalid"));
         }
+
+        var currentAccountDetail = accountRepository.findAccountByAccountID(getID);
+
+        newEntity.setAccountid(currentAccountDetail);
+        newEntity.setSongType(newEntity.getSongType());
+
         return super.create(newEntity);
     }
 

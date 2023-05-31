@@ -47,10 +47,6 @@ public class Song extends BaseEntity<Long> {
     @Column
     private Boolean isPublic;
 
-    @NotNull
-    @Column
-    private Integer state;
-
     //    @JsonInclude(content = JsonInclude.Include.NON_EMPTY)
 //    @ManyToOne(fetch = FetchType.LAZY, optional = false)
 //    @JoinColumn(name = "accountID", referencedColumnName = "accountID", unique = true)

@@ -97,7 +97,17 @@ public class Account implements Serializable {
         this.password = password;
         this.username = username;
     }
+    public Account(String name, Integer gender, Date birthday, String phone, String email) {
+        this.name = name;
+        this.gender = gender;
+        this.birthday = birthday;
+        this.phone = phone;
+        this.email = email;
+    }
 
+    public Account(String avatar){
+        this.avatar = avatar;
+    }
     public Set<Role> getRoles() {
         return roles;
     }

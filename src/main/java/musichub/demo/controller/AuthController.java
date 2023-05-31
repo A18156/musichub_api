@@ -2,11 +2,14 @@ package musichub.demo.controller;
 
 import io.jsonwebtoken.lang.Assert;
 import lombok.var;
+import musichub.demo.model.dto.MailRequest;
+import musichub.demo.model.dto.UpdateClientInfoRequest;
+import musichub.demo.service.UserDetailsImpl;
 import musichub.demo.model.entity.Account;
 import musichub.demo.model.ERole;
 import musichub.demo.model.entity.Role;
-import musichub.demo.payload.request.LoginRequest;
-import musichub.demo.payload.request.SignupRequest;
+import musichub.demo.model.dto.LoginRequest;
+import musichub.demo.model.dto.SignupRequest;
 import musichub.demo.payload.response.MessageResponse;
 import musichub.demo.payload.response.UserInfoResponse;
 import musichub.demo.repository.AccountRepository;
@@ -29,7 +32,8 @@ import org.springframework.web.bind.annotation.*;
 import javax.validation.Valid;
 import java.sql.Date;
 import java.util.HashSet;
-import java.util.Random;
+import java.util.List;
+import java.util.Objects;
 import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -159,11 +163,40 @@ public class AuthController {
     }
 
 
+    @Secured({"ROLE_USER"})
+    @PostMapping("/updateInfo")
+    public ResponseEntity<?> updateInfo(@Valid @RequestBody UpdateClientInfoRequest updateClientInfoRequest) {
+        UserDetailsImpl authentication = (UserDetailsImpl) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        Long accountID = authentication.getAccountID();
+
+        var currentAccountDetail = userRepository.findAccountByAccountID(accountID);
+        var oldEmail = currentAccountDetail.getEmail();
+        var newEmail = updateClientInfoRequest.getEmail();
+        if (!Objects.equals(newEmail, oldEmail) && userRepository.countByEmailAndAccountIDNot(newEmail, accountID) > 0) {
+            return ResponseEntity.badRequest().body(new MessageResponse("Error: Email is already in use!"));
+        }
+        var oldPhone = currentAccountDetail.getPhone();
+        var newPhone = updateClientInfoRequest.getPhone();
+        if (!Objects.equals(newPhone, oldPhone) && userRepository.countByPhoneAndAccountIDNot(newPhone, accountID) > 0) {
+            return ResponseEntity.badRequest().body(new MessageResponse("Error: Phone number is already taken!"));
+        }
+        currentAccountDetail.setName(updateClientInfoRequest.getName());
+        currentAccountDetail.setBirthday(updateClientInfoRequest.getBirthday());
+        currentAccountDetail.setEmail(updateClientInfoRequest.getEmail());
+        currentAccountDetail.setPhone(updateClientInfoRequest.getPhone());
+        currentAccountDetail.setGender(updateClientInfoRequest.getGender());
+
+        userRepository.save(currentAccountDetail);
+
+        return ResponseEntity.ok(new MessageResponse("update info successfully!"));
+    }
+
+
     @PostMapping("/forgot-password")
     public ResponseEntity<?> forgotPwd(@Valid @RequestBody MailRequest request) {
-        Matcher matcher = EMAIL_PATTERN.matcher(request.getMail());
+        Matcher matcher = EMAIL_PATTERN.matcher(request.getEmail());
         if (matcher.matches()) {
-            var account = userRepository.findAccountByEmail(request.getMail());
+            var account = userRepository.findAccountByEmail(request.getEmail());
             if (account == null) {
                 return ResponseEntity.badRequest().body(new MessageResponse("user not found!"));
             }
@@ -172,7 +205,7 @@ public class AuthController {
             userRepository.save(account);
             String subject = "MusicHub - Reset Password";
             String body = "Hello,\n\nNew password is " + randomPwd;
-            senderService.sendEmail(request.getMail(), subject, body);
+            senderService.sendEmail(request.getEmail(), subject, body);
             return ResponseEntity.ok(new MessageResponse("mail sent successful!!"));
         }
         return ResponseEntity.badRequest().body(new MessageResponse("email invalid"));
@@ -193,13 +226,13 @@ public class AuthController {
         UserDetailsImpl authentication = (UserDetailsImpl) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
         Long getID = authentication.getAccountID();
 
-        var currentAcountDetail = userRepository.findAccountByAccountID(getID);
+        var currentAccountDetail = userRepository.findAccountByAccountID(getID);
 
-        if (!encoder.matches(oldPwd, currentAcountDetail.getPassword())) {
+        if (!encoder.matches(oldPwd, currentAccountDetail.getPassword())) {
             return ResponseEntity.badRequest().body(new MessageResponse("you entered the wrong old password!!"));
         }
-        currentAcountDetail.setPassword(encoder.encode(newPwd));
-        userRepository.save(currentAcountDetail);
+        currentAccountDetail.setPassword(encoder.encode(newPwd));
+        userRepository.save(currentAccountDetail);
         return ResponseEntity.ok(new MessageResponse("change password successful!!"));
     }
 

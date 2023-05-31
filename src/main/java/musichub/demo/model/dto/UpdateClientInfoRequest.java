@@ -1,12 +1,14 @@
-package musichub.demo.payload.request;
+package musichub.demo.model.dto;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
 
+import javax.validation.constraints.Email;
+import javax.validation.constraints.NotBlank;
+import javax.validation.constraints.NotNull;
+import javax.validation.constraints.Size;
 import java.sql.Date;
-import java.util.Set;
-import javax.validation.constraints.*;
 
-public class SignupRequest {
+public class UpdateClientInfoRequest {
     @NotBlank
     @Size(min = 3, max = 30)
     private String name;
@@ -28,16 +30,6 @@ public class SignupRequest {
     @Size(max = 50)
     @Email
     private String email;
-
-    @NotBlank
-//    @Size(min = 6, max = 40)
-    private String password;
-
-    @NotBlank
-    @Size(min = 3, max = 20)
-    private String username;
-
-    private Set<String> role;
 
     public String getName() {
         return name;
@@ -79,27 +71,4 @@ public class SignupRequest {
         this.email = email;
     }
 
-    public String getPassword() {
-        return password;
-    }
-
-    public void setPassword(String password) {
-        this.password = password;
-    }
-
-    public String getUsername() {
-        return username;
-    }
-
-    public void setUsername(String username) {
-        this.username = username;
-    }
-
-    public Set<String> getRole() {
-        return role;
-    }
-
-    public void setRole(Set<String> role) {
-        this.role = role;
-    }
 }
