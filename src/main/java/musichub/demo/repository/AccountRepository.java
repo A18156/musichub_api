@@ -20,8 +20,8 @@ public interface AccountRepository extends JpaRepository<Account, Long>{
     Boolean existsByPhone(String phone);
 
     List<Account> findByEmailAndPhoneNot(String email, String phone);
-    Integer countByEmailAndAccountIDNot(String email, Long accId);
-    Integer countByPhoneAndAccountIDNot(String phone, Long accId);
+    Boolean existsByEmailAndAccountIDNot(String email, Long accId);
+    Boolean existsByPhoneAndAccountIDNot(String phone, Long accId);
 //    List<Account> findByPhoneNotIn(String phone);
 //    List<Account> findByAccountIDIn(List<Long> longs);
 }

@@ -27,7 +27,7 @@ public class FilesController {
     @Autowired
     FilesStorageService storageService;
 
-    @Secured({"ROLE_ADMIN","ROLE_PREMIUM","ROLE_MANAGER"})
+    @Secured({"ROLE_ADMIN","ROLE_USER","ROLE_MANAGER"})
     @PostMapping("/upload")
     public ResponseEntity<Result<String>> uploadFile(@RequestParam("file") MultipartFile file) {
         String message = "";
@@ -40,7 +40,7 @@ public class FilesController {
             return ResponseEntity.status(HttpStatus.EXPECTATION_FAILED).body(Result.error(e.getMessage()));
         }
     }
-    @Secured({"ROLE_ADMIN","ROLE_PREMIUM","ROLE_MANAGER"})
+    @Secured({"ROLE_ADMIN","ROLE_USER","ROLE_MANAGER"})
     @GetMapping("/files")
     public ResponseEntity<List<FileInfo>> getListFiles() {
         List<FileInfo> fileInfos = storageService.loadAll().map(path -> {

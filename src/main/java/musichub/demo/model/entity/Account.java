@@ -2,6 +2,9 @@ package musichub.demo.model.entity;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
 import lombok.Data;
+import org.springframework.data.annotation.CreatedDate;
+import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.util.StringUtils;
 
 import javax.persistence.*;
 import javax.validation.constraints.Email;
@@ -38,7 +41,7 @@ public class Account implements Serializable {
     @Column(nullable = false)
     private Integer gender;
 
-//    @NotBlank
+    //    @NotBlank
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd")
 //    @DateTimeFormat(pattern = "dd-mm-yyyy")
     @Column
@@ -67,6 +70,7 @@ public class Account implements Serializable {
     @Column(name = "username", nullable = false)
     private String username;
 
+    @CreatedDate
     @Column(name = "dateRegister")
     private Date dateRegister;
 
@@ -74,7 +78,7 @@ public class Account implements Serializable {
     private boolean isArtist;
 
     @Column(name = "active")
-    private boolean active ;
+    private boolean active;
 
     @Column(name = "package_term")
     private Date packageTerm;
@@ -85,6 +89,11 @@ public class Account implements Serializable {
             inverseJoinColumns = @JoinColumn(name = "roleid"))
     private Set<Role> roles = new HashSet<>();
 
+
+    @PrePersist
+    public void prePersist() {
+        this.dateRegister = new Date(System.currentTimeMillis());
+    }
     public Account() {
     }
 
@@ -97,6 +106,7 @@ public class Account implements Serializable {
         this.password = password;
         this.username = username;
     }
+
     public Account(String name, Integer gender, Date birthday, String phone, String email) {
         this.name = name;
         this.gender = gender;
@@ -105,14 +115,13 @@ public class Account implements Serializable {
         this.email = email;
     }
 
-    public Account(String avatar){
+    public Account(String avatar) {
         this.avatar = avatar;
     }
-    public Set<Role> getRoles() {
-        return roles;
-    }
 
-    public void setRoles(Set<Role> roles) {
-        this.roles = roles;
+    public void encodePwd(PasswordEncoder encoder) {
+        if (StringUtils.hasText(password)) {
+            password = encoder.encode(password);
+        }
     }
 }
