@@ -64,6 +64,14 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
                 .antMatchers("/api/auth/**").permitAll()
                 .antMatchers("/api/musichub/**").permitAll()
                 .antMatchers("/test/**").permitAll()
+                .antMatchers("/").permitAll()
+                .antMatchers("/index.html").permitAll()
+                .antMatchers("/favicon.ico").permitAll()
+                .antMatchers("/static/**").permitAll()
+                .antMatchers("/dist/**").permitAll()
+                .antMatchers("/avatar/**").permitAll()
+                .antMatchers("/images/**").permitAll()
+                .antMatchers("/plugins/**").permitAll()
                 .anyRequest().authenticated();
 
         http.addFilterBefore(authenticationJwtTokenFilter(), UsernamePasswordAuthenticationFilter.class);

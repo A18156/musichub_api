@@ -1,5 +1,6 @@
 package musichub.demo.payload.response;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -17,7 +18,7 @@ public class UserInfoResponse {
     private String name;
 
     private Integer gender;
-
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd")
     private Date birthday;
 
     private String phone;

@@ -33,3 +33,4 @@ build/
 .vscode/
 /src/main/java/template/client/public/dist/
 /uploads/
+/src/main/resources/static/
