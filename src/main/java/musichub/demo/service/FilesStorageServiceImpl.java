@@ -22,7 +22,7 @@ import org.springframework.web.multipart.MultipartFile;
 public class FilesStorageServiceImpl implements FilesStorageService {
 
 //    private final Path root = Paths.get("uploads");
-    private final Path root = Paths.get("E:\\Assignments\\eP-4\\demo\\src\\main\\java\\template\\client\\src\\images\\all");
+    private final Path root = Paths.get("uploads");
 
     @Override
     public void init() {
@@ -61,7 +61,7 @@ public class FilesStorageServiceImpl implements FilesStorageService {
             if (resource.exists() || resource.isReadable()) {
                 return resource;
             } else {
-                throw new RuntimeException("Could not read the file!");
+                throw new IllegalArgumentException("Could not read the file!");
             }
         } catch (MalformedURLException e) {
             throw new RuntimeException("Error: " + e.getMessage());

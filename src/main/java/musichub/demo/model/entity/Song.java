@@ -7,6 +7,8 @@ import com.fasterxml.jackson.annotation.JsonInclude;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import org.hibernate.annotations.Fetch;
+import org.hibernate.annotations.FetchMode;
 import org.hibernate.annotations.OnDelete;
 import org.hibernate.annotations.OnDeleteAction;
 
@@ -64,7 +66,8 @@ public class Song extends BaseEntity<Long> {
 //            joinColumns = @JoinColumn(name = "songid"),
 //            inverseJoinColumns = @JoinColumn(name = "songtypeid"))
 //    private Set<SongType> songType= new HashSet<>();
-    @ManyToOne(fetch = FetchType.LAZY, optional = false)
+    @Fetch(FetchMode.JOIN)
+    @ManyToOne(fetch = FetchType.EAGER, optional = false)
     @JoinColumn(name = "songtype", nullable = false)
     @OnDelete(action = OnDeleteAction.CASCADE)
     private SongType songType;

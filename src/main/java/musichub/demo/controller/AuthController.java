@@ -32,7 +32,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
-@CrossOrigin(origins = {"http://localhost:8080", "http://localhost:3000"}, maxAge = 3600, allowCredentials = "true")
+@CrossOrigin(origins = "http://localhost:8090", maxAge = 3600, allowCredentials = "true")
 @RestController
 @RequestMapping("/api/auth")
 public class AuthController {
@@ -90,7 +90,8 @@ public class AuthController {
                         userDetails.isArtist(),
                         userDetails.isActive(),
                         userDetails.getPackageTerm(),
-                        roles));
+                        roles
+                ));
     }
 
     @PostMapping("/signup")
@@ -169,7 +170,7 @@ public class AuthController {
             if (account == null) {
                 return ResponseEntity.badRequest().body(new MessageResponse("user not found!"));
             }
-            String randomPwd = RandomStringUtils.randomAlphanumeric(6);
+            String randomPwd = RandomStringUtils.randomAlphanumeric(6) + "R#04";
             account.setPassword(encoder.encode(randomPwd));
             accountRepository.save(account);
             String subject = "MusicHub - Reset Password";
@@ -277,13 +278,14 @@ public class AuthController {
 
     }
 
-
+    @Secured({"ROLE_ADMIN"})
     @DeleteMapping("delete-account/{id}")
     public ResponseEntity<?> deleteAccount(@PathVariable Long id) {
         accountRepository.deleteById(id);
         return ResponseEntity.ok().body(Result.success());
     }
 
+    @Secured({"ROLE_ADMIN"})
     @PutMapping("update-account/{id}")
     public ResponseEntity<?> updateAccount(@PathVariable Long id, @Valid @RequestBody AccountDTO request) {
         Account account = request.toRawAccount();
@@ -299,6 +301,7 @@ public class AuthController {
         return accountOpt.map(oldAccount -> roleRepository
                         .findByName(ERole.of(request.getRole()))
                         .map(role -> {
+                            oldAccount.setName(account.getName());
                             oldAccount.setAvatar(account.getAvatar());
                             oldAccount.setBirthday(account.getBirthday());
                             oldAccount.setEmail(account.getEmail());

@@ -12,11 +12,7 @@ import org.springframework.web.bind.annotation.*;
 import javax.validation.Valid;
 import java.util.List;
 
-@CrossOrigin(
-        origins = {"http://localhost:8080", "http://localhost:3000"},
-        maxAge = 3600,
-        allowCredentials = "true"
-)
+@CrossOrigin(originPatterns = "http://localhost:8090", maxAge = 3600, allowCredentials = "true")
 public abstract class CRUDController<R extends JpaRepository<E, I>, E, I> {
 
     @Autowired

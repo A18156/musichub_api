@@ -14,11 +14,7 @@ import javax.validation.Valid;
 
 @RestController
 @RequestMapping("/api/songtype")
-@CrossOrigin(
-        origins = {"http://localhost:8080", "http://localhost:3000"},
-        maxAge = 3600,
-        allowCredentials = "true"
-)
+@CrossOrigin(origins = "http://localhost:8090", maxAge = 3600, allowCredentials = "true")
 public class Song_typeController extends CRUDController<Song_TypeRepository, SongType,Long>{
     @Autowired
     private Song_TypeRepository song_typeRepository;

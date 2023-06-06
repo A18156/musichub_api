@@ -1,4 +1,4 @@
-package musichub.demo.auth;
+package musichub.demo.configure;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.context.annotation.Bean;

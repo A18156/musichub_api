@@ -20,27 +20,28 @@ import org.springframework.web.servlet.mvc.method.annotation.MvcUriComponentsBui
 
 @Slf4j
 @RestController
-@CrossOrigin(origins = {"http://localhost:8080", "http://localhost:3000"}, maxAge = 3600, allowCredentials = "true")
+@CrossOrigin(origins = "http://localhost:8090", maxAge = 3600, allowCredentials = "true")
 @RequestMapping("/api/file")
 public class FilesController {
 
     @Autowired
     FilesStorageService storageService;
 
-    @Secured({"ROLE_ADMIN","ROLE_USER","ROLE_MANAGER"})
+    @Secured({"ROLE_ADMIN", "ROLE_USER", "ROLE_MANAGER"})
     @PostMapping("/upload")
     public ResponseEntity<Result<String>> uploadFile(@RequestParam("file") MultipartFile file) {
         String message = "";
         try {
             var filename = storageService.save(file);
-            log.info( "Uploaded the file successfully: " + file.getOriginalFilename());
+            log.info("Uploaded the file successfully: " + file.getOriginalFilename());
             return ResponseEntity.status(HttpStatus.OK).body(Result.success(filename));
         } catch (Exception e) {
-            log.info(  "Could not upload the file: " + file.getOriginalFilename() + ". Error: " + e.getMessage());
+            log.info("Could not upload the file: " + file.getOriginalFilename() + ". Error: " + e.getMessage());
             return ResponseEntity.status(HttpStatus.EXPECTATION_FAILED).body(Result.error(e.getMessage()));
         }
     }
-    @Secured({"ROLE_ADMIN","ROLE_USER","ROLE_MANAGER"})
+
+    @Secured({"ROLE_ADMIN", "ROLE_USER", "ROLE_MANAGER"})
     @GetMapping("/files")
     public ResponseEntity<List<FileInfo>> getListFiles() {
         List<FileInfo> fileInfos = storageService.loadAll().map(path -> {
@@ -52,14 +53,5 @@ public class FilesController {
         }).collect(Collectors.toList());
 
         return ResponseEntity.status(HttpStatus.OK).body(fileInfos);
-    }
-
-
-    @GetMapping("/files/{filename:.+}")
-    @ResponseBody
-    public ResponseEntity<Resource> getFile(@PathVariable String filename) {
-        Resource file = storageService.load(filename);
-        return ResponseEntity.ok()
-                .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"" + file.getFilename() + "\"").body(file);
     }
 }
